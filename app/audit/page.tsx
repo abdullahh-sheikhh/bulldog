@@ -1,25 +1,25 @@
 "use client";
 import { useStore } from "@/lib/store";
+import { PageHeader } from "@/components/ui";
 
 export default function AuditPage() {
   const s = useStore();
   return (
     <div>
-      <h1>Audit log</h1>
-      <p className="sub">Every approval and every agent step, in order.</p>
-      <div className="card" style={{ padding: 0 }}>
+      <PageHeader title="Audit log" desc="Every approval and every agent step, in order." />
+      <div className="card flush">
         <table>
           <thead><tr><th>Time</th><th>Actor</th><th>Event</th><th>Detail</th></tr></thead>
           <tbody>
             {s.audit.map((a) => (
               <tr key={a.id}>
-                <td>{new Date(a.at).toLocaleTimeString()}</td>
-                <td><span className="pill">{a.actor}</span></td>
-                <td>{a.event}</td>
-                <td>{a.detail}</td>
+                <td className="sub" style={{ whiteSpace: "nowrap" }}>{new Date(a.at).toLocaleTimeString()}</td>
+                <td><span className="tag">{a.actor}</span></td>
+                <td style={{ fontWeight: 500 }}>{a.event.replace(/_/g, " ")}</td>
+                <td className="sub">{a.detail}</td>
               </tr>
             ))}
-            {s.audit.length === 0 && <tr><td colSpan={4} className="sub">No events yet.</td></tr>}
+            {s.audit.length === 0 && <tr><td colSpan={4} className="sub" style={{ textAlign: "center", padding: 40 }}>No events yet.</td></tr>}
           </tbody>
         </table>
       </div>
