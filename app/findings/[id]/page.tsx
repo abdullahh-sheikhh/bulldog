@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useStore, setState, logAudit, money } from "@/lib/store";
+import { Avatar, Icon } from "@/components/ui";
 
 export default function FindingDetail() {
   const params = useParams<{ id: string }>();
@@ -10,7 +11,7 @@ export default function FindingDetail() {
   const router = useRouter();
   const f = s.findings.find((x) => x.id === id);
 
-  if (!f) return <div className="card"><p className="sub">Finding not found. <Link href="/findings" style={{ color: "#f5a524" }}>Back to findings</Link></p></div>;
+  if (!f) return <div className="card empty"><b>Finding not found</b><p className="sub"><Link href="/findings" style={{ color: "#4f46e5" }}>Back to findings</Link></p></div>;
 
   function decide(decision: "approved" | "rejected") {
     setState((st) =>
@@ -27,37 +28,45 @@ export default function FindingDetail() {
 
   return (
     <div>
-      <Link href="/findings" className="sub">← All findings</Link>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", margin: "12px 0 20px" }}>
-        <div>
-          <h1>{f.vendor}: {f.title}</h1>
-          <p className="sub">{f.summary}</p>
+      <Link href="/findings" className="crumb"><Icon n="back" size={16} />All findings</Link>
+      <div className="ph" style={{ alignItems: "flex-start" }}>
+        <div className="vend" style={{ alignItems: "flex-start" }}>
+          <div style={{ transform: "scale(1.3)", transformOrigin: "top left", marginRight: 8 }}><Avatar name={f.vendor} /></div>
+          <div>
+            <h1>{f.vendor}: {f.title}</h1>
+            <p style={{ maxWidth: 620 }}>{f.summary}</p>
+          </div>
         </div>
         <div style={{ textAlign: "right" }}>
-          <div className="big" style={{ fontSize: 34 }}>{money(f.monthly)}</div>
-          <div className="sub" style={{ margin: 0 }}>wasted per month</div>
+          <div style={{ fontSize: 34, fontWeight: 700, letterSpacing: "-.02em" }}>{money(f.monthly)}</div>
+          <div className="muted">wasted per month</div>
         </div>
       </div>
 
+      <h3 style={{ fontSize: 13, color: "#8a94a6", textTransform: "uppercase", letterSpacing: ".06em", margin: "0 0 12px" }}>Evidence</h3>
       <div className="grid g2">
         {f.evidence.map((e) => (
-          <div key={e.title} className={"card" + (e.tone === "bad" ? " bad" : "")}>
-            <h3 style={{ marginTop: 0 }}>{e.title}</h3>
-            {e.rows.map(([k, v]) => (
-              <div className="kv" key={k}><span>{k}</span><span>{v}</span></div>
-            ))}
+          <div key={e.title} className={"ev" + (e.tone === "bad" ? " bad" : "")}>
+            <div className="eh"><Icon n={e.tone === "bad" ? "alert" : "file"} size={16} />{e.title}</div>
+            <div className="eb">
+              {e.rows.map(([k, v]) => (
+                <div className="kv" key={k}><span>{k}</span><span>{v}</span></div>
+              ))}
+            </div>
           </div>
         ))}
       </div>
 
-      <div className="card" style={{ marginTop: 20 }}>
-        <div className="sub" style={{ margin: "0 0 4px" }}>Proposed action</div>
-        <b style={{ fontSize: 18 }}>{f.actionLabel}</b>
-        <p className="sub" style={{ margin: "6px 0 16px" }}>Nothing runs until you approve. Every step is logged in the audit log.</p>
+      <div className="action">
+        <div>
+          <div className="muted" style={{ fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: ".06em" }}>Proposed action</div>
+          <b>{f.actionLabel}</b>
+          <p className="sub" style={{ marginTop: 2 }}>Nothing runs until you approve. Every step is written to the audit log.</p>
+        </div>
         {f.status === "pending" ? (
-          <div style={{ display: "flex", gap: 12 }}>
-            <button className="btn" onClick={() => decide("approved")}>Approve & execute</button>
+          <div style={{ display: "flex", gap: 10 }}>
             <button className="btn bad" onClick={() => decide("rejected")}>Reject</button>
+            <button className="btn lg" onClick={() => decide("approved")}><Icon n="check" size={16} />Approve & execute</button>
           </div>
         ) : (
           <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
