@@ -1,11 +1,12 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useStore, setState, getState, logAudit, resetAll, uid } from "@/lib/store";
+import { useStore, setState, logAudit, resetAll, uid } from "@/lib/store";
 import { runDetection } from "@/lib/detect";
 import { sampleState } from "@/lib/sample";
 import { parseCsvFile, pdfText, parseInvoiceText } from "@/lib/extract";
 import type { Doc } from "@/lib/types";
+import { Icon, PageHeader } from "@/components/ui";
 
 export default function UploadPage() {
   const s = useStore();
@@ -61,37 +62,48 @@ export default function UploadPage() {
     detectNow();
   }
 
+  const hasDocs = s.docs.length > 0;
   return (
     <div>
-      <h1>Upload spend data</h1>
-      <p className="sub">Drop invoices (PDF), card statements and usage exports (CSV). BullDog reads them in your browser and finds the waste.</p>
+      <PageHeader title="Find wasted spend" desc="Upload invoices, card statements and usage exports. Everything is read in your browser.">
+        <button className="btn ghost" onClick={() => { resetAll(); setErrors([]); }}><Icon n="reset" size={16} />Reset</button>
+        <button className="btn ghost" onClick={loadSample}><Icon n="sparkle" size={16} />Load sample data</button>
+      </PageHeader>
+
+      <div className="steps">
+        <div className={"st " + (hasDocs ? "dn" : "on")}><span className="n">{hasDocs ? "✓" : 1}</span>Upload</div><span className="ln" />
+        <div className={"st " + (hasDocs ? "on" : "")}><span className="n">2</span>Detect waste</div><span className="ln" />
+        <div className="st"><span className="n">3</span>Approve & act</div>
+      </div>
+
       <div
         className={"drop" + (over ? " over" : "")}
         onDragOver={(e) => { e.preventDefault(); setOver(true); }}
         onDragLeave={() => setOver(false)}
         onDrop={(e) => { e.preventDefault(); setOver(false); handleFiles(e.dataTransfer.files); }}
       >
-        <p style={{ fontSize: 18, margin: "0 0 12px", color: "#0a2540" }}>Drag & drop invoices and CSVs here</p>
-        <label className="btn ghost">
+        <div className="ico"><Icon n="upload" size={22} /></div>
+        <h3>Drag and drop files here</h3>
+        <p className="sub" style={{ marginBottom: 16 }}>PDF invoices, card statement CSVs and usage CSVs</p>
+        <label className="btn ghost" style={{ cursor: "pointer" }}>
           Choose files
           <input type="file" multiple accept=".pdf,.csv" hidden onChange={(e) => e.target.files && handleFiles(e.target.files)} />
         </label>
-        {busy && <p style={{ color: "#635bff" }}>{busy}</p>}
+        {busy && <p style={{ color: "#4f46e5", fontWeight: 600, marginTop: 14 }}>{busy}</p>}
       </div>
-      {errors.map((e) => (
-        <div className="err" key={e}>{e}</div>
-      ))}
+      {errors.map((e) => <div className="err" key={e}>{e}</div>)}
 
-      <div style={{ display: "flex", gap: 12, margin: "20px 0" }}>
-        <button className="btn" onClick={detectNow} disabled={!s.docs.length}>Find waste →</button>
-        <button className="btn ghost" onClick={loadSample}>Load sample data</button>
-        <button className="btn ghost" onClick={() => { resetAll(); setErrors([]); }}>Reset demo</button>
-      </div>
-
-      <div className="card">
-        <h3 style={{ marginTop: 0 }}>Documents ({s.docs.length})</h3>
-        {s.docs.length === 0 ? (
-          <p className="sub">Nothing uploaded yet.</p>
+      <div className="card flush" style={{ marginTop: 20 }}>
+        <div className="ch">
+          <h3>Documents ({s.docs.length})</h3>
+          <button className="btn" onClick={detectNow} disabled={!hasDocs}>Find waste<Icon n="arrow" size={16} /></button>
+        </div>
+        {!hasDocs ? (
+          <div className="empty">
+            <div className="ico"><Icon n="file" size={22} /></div>
+            <b>No documents yet</b>
+            <p className="sub">Upload files above, or load sample data to see BullDog in action.</p>
+          </div>
         ) : (
           <table>
             <thead><tr><th>File</th><th>Type</th><th>Extracted</th></tr></thead>
@@ -100,7 +112,11 @@ export default function UploadPage() {
                 const it = s.items.find((i) => i.docId === d.id);
                 const detail = d.kind === "invoice" && it ? it.vendor + " · " + it.invoiceNo + " · " + it.qty + " × $" + it.unitPrice : d.kind === "card" ? s.card.filter((c) => c.docId === d.id).length + " transactions" : s.usage.filter((u) => u.docId === d.id).length + " seats";
                 return (
-                  <tr key={d.id}><td>{d.name}</td><td><span className="pill">{d.kind}</span></td><td>{detail}</td></tr>
+                  <tr key={d.id}>
+                    <td style={{ fontWeight: 500 }}>{d.name}</td>
+                    <td><span className="tag">{d.kind}</span></td>
+                    <td className="sub">{detail}</td>
+                  </tr>
                 );
               })}
             </tbody>
