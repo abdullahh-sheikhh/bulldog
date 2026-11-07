@@ -48,7 +48,9 @@ export type Finding = {
 
 export type Audit = { id: string; at: string; actor: string; event: string; detail: string };
 
+export type Trial = { id: string; vendor: string; product: string; startedOn: string; endsOn: string; priceAfter: number; status: "active" | "stop_requested" | "kept" | "dismissed"; source: string; findingId?: string };
 export type State = {
+  trials: Trial[];
   docs: Doc[];
   items: LineItem[];
   card: CardTx[];
