@@ -3,7 +3,7 @@ import { useSyncExternalStore } from "react";
 import type { State, Audit } from "./types";
 
 const KEY = "bulldog.v1";
-export const EMPTY: State = { docs: [], items: [], card: [], usage: [], findings: [], audit: [] };
+export const EMPTY: State = { trials: [], docs: [], items: [], card: [], usage: [], findings: [], audit: [] };
 
 let state: State = EMPTY;
 let loaded = false;
