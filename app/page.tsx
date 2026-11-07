@@ -18,13 +18,20 @@ const detectors = [
 export default function Landing() {
   return (
     <div className="lp">
-      <div className="lp-nav">
+      <div className="lp-navbar"><div className="lp-nav">
         <Link href="/" className="brand">
           <span className="mk"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 17l4-8 3 5 3-5 4 8" /></svg></span>
           BullDog
         </Link>
-        <Link href="/upload" className="btn">Open the app<Icon n="arrow" size={16} /></Link>
-      </div>
+        <nav className="lp-links">
+          <a href="#how">How it works</a>
+          <Link href="/upload">Upload</Link>
+          <Link href="/findings">Findings</Link>
+          <Link href="/trials">Trials</Link>
+          <Link href="/dashboard">Dashboard</Link>
+          <Link href="/audit">Audit log</Link>
+        </nav>
+      </div></div>
 
       <section className="lp-hero">
         <div className="lp-wrap">
