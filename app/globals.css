@@ -184,3 +184,10 @@ pre{white-space:pre-wrap;font-family:ui-monospace,Menlo,monospace;font-size:13px
 .lp-final h2{font-size:38px;letter-spacing:-.025em;margin:0 0 12px}
 .lp-foot{border-top:1px solid var(--line);padding:24px 0;color:var(--mut);text-align:center}
 @media(max-width:860px){.lp-hero h1{font-size:38px}.lp-steps,.lp-feat,.lp-stats,.lp-trust{grid-template-columns:1fr}.lp-trust{padding:28px}.lp-nav,.lp-wrap{padding-left:16px;padding-right:16px}}
+
+.lp-navbar{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.lp-navbar .lp-nav{padding-top:12px;padding-bottom:12px}
+.lp-links{display:flex;gap:4px;align-items:center;flex-wrap:wrap}
+.lp-links a{padding:8px 14px;border-radius:9px;color:var(--text2);font-weight:600;font-size:14px;text-decoration:none}
+.lp-links a:hover{background:var(--accl);color:var(--accd)}
+@media(max-width:860px){.lp-links a{padding:6px 8px;font-size:13px}}
