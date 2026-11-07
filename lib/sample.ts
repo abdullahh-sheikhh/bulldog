@@ -1,4 +1,4 @@
-import type { State, LineItem, CardTx, UsageRow, Doc } from "./types";
+import type { Trial, State, LineItem, CardTx, UsageRow, Doc } from "./types";
 
 function item(docId: string, vendor: string, product: string, invoiceNo: string, date: string, qty: number, unit: number, payment: "card" | "bank", trial = false): LineItem {
   return { id: "li_" + invoiceNo, docId, vendor, product, invoiceNo, date, qty, unitPrice: unit, amount: qty * unit, payment, trial };
@@ -57,4 +57,17 @@ export function sampleState(): Pick<State, "docs" | "items" | "card" | "usage"> 
     });
   }
   return { docs, items, card, usage };
+}
+
+export function sampleTrials(): Trial[] {
+  const d = (n: number) => {
+    const x = new Date();
+    x.setUTCDate(x.getUTCDate() + n);
+    return x.toISOString().slice(0, 10);
+  };
+  return [
+    { id: "tr_s1", vendor: "Loomly AI", product: "Loomly AI Pro, 14-day free trial", startedOn: d(-12), endsOn: d(2), priceAfter: 79, status: "active", source: "sample" },
+    { id: "tr_s2", vendor: "Notionly", product: "Notionly Team, free trial", startedOn: d(-8), endsOn: d(6), priceAfter: 96, status: "active", source: "sample" },
+    { id: "tr_s3", vendor: "Datawise", product: "Datawise Analytics, 30-day trial", startedOn: d(-10), endsOn: d(20), priceAfter: 249, status: "active", source: "sample" },
+  ];
 }
