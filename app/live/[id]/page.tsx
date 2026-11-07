@@ -48,22 +48,27 @@ export default function LivePage() {
     // eslint-disable-next-line
   }, [f?.id, f?.status]);
 
-  if (!f || !script) return <div className="card"><p className="sub">Finding not found. <Link href="/findings" style={{ color: "#f5a524" }}>Back</Link></p></div>;
+  if (!f || !script) return <div className="card"><p className="sub">Finding not found. <Link href="/findings" style={{ color: "#4f46e5" }}>Back</Link></p></div>;
 
   const steps = f.action ? f.action.steps : script.steps;
   const cur = Math.min(shown, steps.length) - 1;
   const screen = cur >= 0 ? steps[cur] : null;
 
-  if (f.status === "pending") return <div className="card"><p className="sub">This finding is not approved yet. <Link href={"/findings/" + encodeURIComponent(f.id)} style={{ color: "#f5a524" }}>Review it</Link></p></div>;
+  if (f.status === "pending") return <div className="card"><p className="sub">This finding is not approved yet. <Link href={"/findings/" + encodeURIComponent(f.id)} style={{ color: "#4f46e5" }}>Review it</Link></p></div>;
 
   return (
     <div>
-      <Link href="/findings" className="sub">← All findings</Link>
-      <h1 style={{ marginTop: 12 }}>Agent working: {f.vendor}</h1>
-      <p className="sub">{f.actionLabel} · approved by you · {money(f.monthly)}/mo</p>
+      <Link href="/findings" className="crumb">← All findings</Link>
+      <div className="ph">
+        <div>
+          <h1>{f.status === "done" ? "Completed" : "Agent working"}: {f.vendor}</h1>
+          <p>{f.actionLabel} · approved by you · {money(f.monthly)}/mo</p>
+        </div>
+        <span className={"pill " + f.status}>{f.status === "done" ? "done" : "running"}</span>
+      </div>
       <div className="grid g2">
         <div className="card">
-          <h3 style={{ marginTop: 0 }}>Step timeline</h3>
+          <h3>Agent timeline</h3>
           <ul className="tl">
             {steps.map((st, i) => (
               <li key={i} className={(i < shown ? "on " : "") + (i === cur && !finished ? "cur" : "")}>
@@ -75,7 +80,7 @@ export default function LivePage() {
         </div>
         <div>
           <div className="browser">
-            <div className="bar">🔒 https://{script.url}/billing</div>
+            <div className="bar"><i /><i /><i /><span>🔒 https://{script.url}/billing</span></div>
             <div className="body">
               {screen ? (
                 <>
