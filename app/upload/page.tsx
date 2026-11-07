@@ -71,12 +71,12 @@ export default function UploadPage() {
         onDragLeave={() => setOver(false)}
         onDrop={(e) => { e.preventDefault(); setOver(false); handleFiles(e.dataTransfer.files); }}
       >
-        <p style={{ fontSize: 18, margin: "0 0 12px", color: "#e6ebf5" }}>Drag & drop invoices and CSVs here</p>
+        <p style={{ fontSize: 18, margin: "0 0 12px", color: "#0a2540" }}>Drag & drop invoices and CSVs here</p>
         <label className="btn ghost">
           Choose files
           <input type="file" multiple accept=".pdf,.csv" hidden onChange={(e) => e.target.files && handleFiles(e.target.files)} />
         </label>
-        {busy && <p style={{ color: "#f5a524" }}>{busy}</p>}
+        {busy && <p style={{ color: "#635bff" }}>{busy}</p>}
       </div>
       {errors.map((e) => (
         <div className="err" key={e}>{e}</div>
