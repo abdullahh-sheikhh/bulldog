@@ -3,7 +3,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useStore, setState, logAudit, resetAll, uid } from "@/lib/store";
 import { runDetection } from "@/lib/detect";
-import { sampleState } from "@/lib/sample";
+import { sampleState, sampleTrials } from "@/lib/sample";
+import { ingestEmails, parseEml, parseMbox } from "@/lib/email";
+import GmailCard from "@/components/GmailCard";
 import { parseCsvFile, pdfText, parseInvoiceText } from "@/lib/extract";
 import type { Doc } from "@/lib/types";
 import { Icon, PageHeader } from "@/components/ui";
@@ -21,6 +23,14 @@ export default function UploadPage() {
       setBusy("Extracting " + file.name + "…");
       const docId = uid("doc");
       try {
+        const lower = file.name.toLowerCase();
+        if (lower.endsWith(".eml") || lower.endsWith(".mbox")) {
+          const raw = await file.text();
+          const mails = lower.endsWith(".mbox") ? parseMbox(raw) : [parseEml(raw, "eml_" + file.name + "_" + file.size)];
+          const r = ingestEmails(mails);
+          if (r.items + r.trials === 0) errs.push(file.name + ": no invoice or trial found in this email");
+          continue;
+        }
         let kind: Doc["kind"] = "invoice";
         if (file.name.toLowerCase().endsWith(".csv")) {
           const parsed = parseCsvFile(await file.text(), docId);
@@ -50,7 +60,8 @@ export default function UploadPage() {
   function detectNow() {
     setState((st) => {
       const findings = runDetection(st);
-      return logAudit({ ...st, findings }, "system", "detection_run", findings.length + " findings from " + st.docs.length + " documents");
+      const keep = st.findings.filter((x) => x.id.startsWith("trialstop_"));
+      return logAudit({ ...st, findings: [...findings.filter((x) => !keep.some((k) => k.id === x.id)), ...keep] }, "system", "detection_run", findings.length + " findings from " + st.docs.length + " documents");
     });
     router.push("/findings");
   }
@@ -58,11 +69,11 @@ export default function UploadPage() {
   function loadSample() {
     resetAll();
     const sm = sampleState();
-    setState((st) => logAudit({ ...st, ...sm }, "system", "sample_loaded", sm.docs.length + " sample documents"));
+    setState((st) => logAudit({ ...st, ...sm, trials: sampleTrials() }, "system", "sample_loaded", sm.docs.length + " sample documents"));
     detectNow();
   }
 
-  const hasDocs = s.docs.length > 0;
+  const hasDocs = s.docs.length > 0 || s.trials.length > 0;
   return (
     <div>
       <PageHeader title="Find wasted spend" desc="Upload invoices, card statements and usage exports. Everything is read in your browser.">
@@ -84,14 +95,16 @@ export default function UploadPage() {
       >
         <div className="ico"><Icon n="upload" size={22} /></div>
         <h3>Drag and drop files here</h3>
-        <p className="sub" style={{ marginBottom: 16 }}>PDF invoices, card statement CSVs and usage CSVs</p>
+        <p className="sub" style={{ marginBottom: 16 }}>PDF invoices, card statement CSVs, usage CSVs and .eml / .mbox emails (invoices and free-trial notices)</p>
         <label className="btn ghost" style={{ cursor: "pointer" }}>
           Choose files
-          <input type="file" multiple accept=".pdf,.csv" hidden onChange={(e) => e.target.files && handleFiles(e.target.files)} />
+          <input type="file" multiple accept=".pdf,.csv,.eml,.mbox" hidden onChange={(e) => e.target.files && handleFiles(e.target.files)} />
         </label>
         {busy && <p style={{ color: "#4f46e5", fontWeight: 600, marginTop: 14 }}>{busy}</p>}
       </div>
       {errors.map((e) => <div className="err" key={e}>{e}</div>)}
+
+      <GmailCard />
 
       <div className="card flush" style={{ marginTop: 20 }}>
         <div className="ch">
