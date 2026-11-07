@@ -3,10 +3,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useStore, money0 } from "@/lib/store";
 import { Icon } from "@/components/ui";
+import { daysLeft } from "@/lib/email";
 
 const links = [
   ["/upload", "Upload", "upload"],
   ["/findings", "Findings", "find"],
+  ["/trials", "Trials", "alert"],
   ["/dashboard", "Savings", "chart"],
   ["/audit", "Audit log", "log"],
 ];
@@ -16,7 +18,9 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   const s = useStore();
   const open = s.findings.filter((f) => f.status === "pending");
   const total = s.findings.filter((f) => f.status === "pending" || f.status === "approved").reduce((a, f) => a + f.monthly, 0);
+  const soon = s.trials.filter((t) => t.status === "active" && daysLeft(t.endsOn) <= 7).length;
   const isOn = (h: string) => path.startsWith(h) || (h === "/findings" && path.startsWith("/live"));
+  if (path === "/") return <>{children}</>;
   return (
     <div className="shell">
       <aside className="side">
@@ -32,6 +36,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             <Icon n={icon} />
             {label}
             {href === "/findings" && open.length > 0 && <span className="cnt">{open.length}</span>}
+            {href === "/trials" && soon > 0 && <span className="cnt" style={{ background: "#d92d20" }}>{soon}</span>}
           </Link>
         ))}
         <div className="foot">
